@@ -1,3 +1,7 @@
 go 1.19
 
-use ./pkg/authms
+use (
+	./pkg/authms
+	./pkg/models
+	./pkg/userms
+)
