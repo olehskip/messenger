@@ -1,15 +1,13 @@
-package usermodel;
+package usermodel
+
+import (
+	"time"
+)
 
 type UserModel struct {
-	Id string
-	Username string
-	Name string
 	Bio string
-	
-	// regTimestamp string
+	Id string
+	Name string
+	RegTimestamp time.Time
+	Username string
 }
-//
-// func (u *UserModel) RegTimestamp() string {
-// 	return u.regTimestamp
-// }
-

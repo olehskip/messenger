@@ -1,6 +1,7 @@
 go 1.19
 
 use (
+	./cmd/scyllamodelgen
 	./pkg/authms
 	./pkg/models
 	./pkg/userms
