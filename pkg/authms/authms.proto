@@ -1,0 +1,16 @@
+syntax = "proto3";
+option go_package="./pb";
+
+service AuthMs {
+	rpc Auth(Credentials) returns (Auth Response) {}
+}
+
+message Credentials {
+	string username = 1;
+	string password = 2;
+}
+
+message AuthResponse {
+	string token = 1;
+}
+
