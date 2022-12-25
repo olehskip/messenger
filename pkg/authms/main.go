@@ -1,7 +1,10 @@
 package main
 
 import (
-	"github.com/olegskip/messenger/pkg/authms/transport"
+	"github.com/olegskip/messenger/pkg/authms/server"
+	"github.com/olegskip/messenger/pkg/authms/service"
+
+	"log"
 )
 
 
@@ -20,9 +23,23 @@ import (
 // 	fmt.Println(rsp.Greeting)
 // }
 
-func main() {
-	// var iTransport transport.ITransport
+type Vehicle struct {
+}
 
-	transport.CreateGRPCTransport()
-	transport.Run()
+type Car struct {
+    Vehicle //anonymous field Vehicle
+}
+
+func test(v *Vehicle) {
+
+}
+
+func main() {
+	if err := server.NewGRPCServer(
+		service.NewAuthService(
+			new(service.InMemoryDAO),
+		),
+	).Run(); err != nil {
+		log.Fatalf("Can't run server; Error = %v", err)
+	}
 }

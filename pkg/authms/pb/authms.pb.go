@@ -75,16 +75,16 @@ func (x *Credentials) GetPassword() string {
 	return ""
 }
 
-type LoginResponse struct {
+type RT struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	IsSuccess bool `protobuf:"varint,1,opt,name=isSuccess,proto3" json:"isSuccess,omitempty"`
+	Rt string `protobuf:"bytes,1,opt,name=rt,proto3" json:"rt,omitempty"`
 }
 
-func (x *LoginResponse) Reset() {
-	*x = LoginResponse{}
+func (x *RT) Reset() {
+	*x = RT{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_authms_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -92,13 +92,13 @@ func (x *LoginResponse) Reset() {
 	}
 }
 
-func (x *LoginResponse) String() string {
+func (x *RT) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LoginResponse) ProtoMessage() {}
+func (*RT) ProtoMessage() {}
 
-func (x *LoginResponse) ProtoReflect() protoreflect.Message {
+func (x *RT) ProtoReflect() protoreflect.Message {
 	mi := &file_authms_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -110,16 +110,212 @@ func (x *LoginResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LoginResponse.ProtoReflect.Descriptor instead.
-func (*LoginResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use RT.ProtoReflect.Descriptor instead.
+func (*RT) Descriptor() ([]byte, []int) {
 	return file_authms_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *LoginResponse) GetIsSuccess() bool {
+func (x *RT) GetRt() string {
 	if x != nil {
-		return x.IsSuccess
+		return x.Rt
 	}
-	return false
+	return ""
+}
+
+type JWT struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Jwt string `protobuf:"bytes,1,opt,name=jwt,proto3" json:"jwt,omitempty"`
+}
+
+func (x *JWT) Reset() {
+	*x = JWT{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_authms_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *JWT) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JWT) ProtoMessage() {}
+
+func (x *JWT) ProtoReflect() protoreflect.Message {
+	mi := &file_authms_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JWT.ProtoReflect.Descriptor instead.
+func (*JWT) Descriptor() ([]byte, []int) {
+	return file_authms_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *JWT) GetJwt() string {
+	if x != nil {
+		return x.Jwt
+	}
+	return ""
+}
+
+type Tokens struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Rt  string `protobuf:"bytes,1,opt,name=rt,proto3" json:"rt,omitempty"`
+	Jwt string `protobuf:"bytes,2,opt,name=jwt,proto3" json:"jwt,omitempty"`
+}
+
+func (x *Tokens) Reset() {
+	*x = Tokens{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_authms_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Tokens) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Tokens) ProtoMessage() {}
+
+func (x *Tokens) ProtoReflect() protoreflect.Message {
+	mi := &file_authms_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Tokens.ProtoReflect.Descriptor instead.
+func (*Tokens) Descriptor() ([]byte, []int) {
+	return file_authms_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Tokens) GetRt() string {
+	if x != nil {
+		return x.Rt
+	}
+	return ""
+}
+
+func (x *Tokens) GetJwt() string {
+	if x != nil {
+		return x.Jwt
+	}
+	return ""
+}
+
+type RevokeResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Error string `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+}
+
+func (x *RevokeResponse) Reset() {
+	*x = RevokeResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_authms_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RevokeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeResponse) ProtoMessage() {}
+
+func (x *RevokeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_authms_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeResponse.ProtoReflect.Descriptor instead.
+func (*RevokeResponse) Descriptor() ([]byte, []int) {
+	return file_authms_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *RevokeResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type User struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (x *User) Reset() {
+	*x = User{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_authms_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *User) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*User) ProtoMessage() {}
+
+func (x *User) ProtoReflect() protoreflect.Message {
+	mi := &file_authms_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use User.ProtoReflect.Descriptor instead.
+func (*User) Descriptor() ([]byte, []int) {
+	return file_authms_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *User) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
 }
 
 var File_authms_proto protoreflect.FileDescriptor
@@ -130,14 +326,28 @@ var file_authms_proto_rawDesc = []byte{
 	0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
 	0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73,
 	0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73,
-	0x73, 0x77, 0x6f, 0x72, 0x64, 0x22, 0x2d, 0x0a, 0x0d, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x69, 0x73, 0x53, 0x75, 0x63, 0x63,
-	0x65, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x09, 0x69, 0x73, 0x53, 0x75, 0x63,
-	0x63, 0x65, 0x73, 0x73, 0x32, 0x30, 0x0a, 0x06, 0x41, 0x75, 0x74, 0x68, 0x4d, 0x73, 0x12, 0x26,
-	0x0a, 0x04, 0x41, 0x75, 0x74, 0x68, 0x12, 0x0c, 0x2e, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74,
-	0x69, 0x61, 0x6c, 0x73, 0x1a, 0x0e, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x73, 0x77, 0x6f, 0x72, 0x64, 0x22, 0x14, 0x0a, 0x02, 0x52, 0x54, 0x12, 0x0e, 0x0a, 0x02, 0x72,
+	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x72, 0x74, 0x22, 0x17, 0x0a, 0x03, 0x4a,
+	0x57, 0x54, 0x12, 0x10, 0x0a, 0x03, 0x6a, 0x77, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x03, 0x6a, 0x77, 0x74, 0x22, 0x2a, 0x0a, 0x06, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x73, 0x12, 0x0e,
+	0x0a, 0x02, 0x72, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x72, 0x74, 0x12, 0x10,
+	0x0a, 0x03, 0x6a, 0x77, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6a, 0x77, 0x74,
+	0x22, 0x26, 0x0a, 0x0e, 0x52, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x16, 0x0a, 0x04, 0x55, 0x73, 0x65, 0x72,
+	0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64,
+	0x32, 0xa2, 0x01, 0x0a, 0x06, 0x41, 0x75, 0x74, 0x68, 0x4d, 0x73, 0x12, 0x23, 0x0a, 0x08, 0x47,
+	0x65, 0x74, 0x4e, 0x65, 0x77, 0x52, 0x54, 0x12, 0x0c, 0x2e, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e,
+	0x74, 0x69, 0x61, 0x6c, 0x73, 0x1a, 0x07, 0x2e, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x73, 0x22, 0x00,
+	0x12, 0x19, 0x0a, 0x09, 0x52, 0x65, 0x70, 0x6c, 0x61, 0x63, 0x65, 0x52, 0x54, 0x12, 0x04, 0x2e,
+	0x4a, 0x57, 0x54, 0x1a, 0x04, 0x2e, 0x4a, 0x57, 0x54, 0x22, 0x00, 0x12, 0x18, 0x0a, 0x09, 0x47,
+	0x65, 0x74, 0x4e, 0x65, 0x77, 0x4a, 0x57, 0x54, 0x12, 0x03, 0x2e, 0x52, 0x54, 0x1a, 0x04, 0x2e,
+	0x4a, 0x57, 0x54, 0x22, 0x00, 0x12, 0x24, 0x0a, 0x06, 0x52, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x12,
+	0x07, 0x2e, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x73, 0x1a, 0x0f, 0x2e, 0x52, 0x65, 0x76, 0x6f, 0x6b,
+	0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x18, 0x0a, 0x07, 0x47,
+	0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12, 0x04, 0x2e, 0x4a, 0x57, 0x54, 0x1a, 0x05, 0x2e, 0x55,
+	0x73, 0x65, 0x72, 0x22, 0x00, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -152,16 +362,28 @@ func file_authms_proto_rawDescGZIP() []byte {
 	return file_authms_proto_rawDescData
 }
 
-var file_authms_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_authms_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_authms_proto_goTypes = []interface{}{
-	(*Credentials)(nil),   // 0: Credentials
-	(*LoginResponse)(nil), // 1: LoginResponse
+	(*Credentials)(nil),    // 0: Credentials
+	(*RT)(nil),             // 1: RT
+	(*JWT)(nil),            // 2: JWT
+	(*Tokens)(nil),         // 3: Tokens
+	(*RevokeResponse)(nil), // 4: RevokeResponse
+	(*User)(nil),           // 5: User
 }
 var file_authms_proto_depIdxs = []int32{
-	0, // 0: AuthMs.Auth:input_type -> Credentials
-	1, // 1: AuthMs.Auth:output_type -> LoginResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	0, // 0: AuthMs.GetNewRT:input_type -> Credentials
+	2, // 1: AuthMs.ReplaceRT:input_type -> JWT
+	1, // 2: AuthMs.GetNewJWT:input_type -> RT
+	3, // 3: AuthMs.Revoke:input_type -> Tokens
+	2, // 4: AuthMs.GetUser:input_type -> JWT
+	3, // 5: AuthMs.GetNewRT:output_type -> Tokens
+	2, // 6: AuthMs.ReplaceRT:output_type -> JWT
+	2, // 7: AuthMs.GetNewJWT:output_type -> JWT
+	4, // 8: AuthMs.Revoke:output_type -> RevokeResponse
+	5, // 9: AuthMs.GetUser:output_type -> User
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -186,7 +408,55 @@ func file_authms_proto_init() {
 			}
 		}
 		file_authms_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LoginResponse); i {
+			switch v := v.(*RT); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_authms_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*JWT); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_authms_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Tokens); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_authms_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RevokeResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_authms_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*User); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -204,7 +474,7 @@ func file_authms_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_authms_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

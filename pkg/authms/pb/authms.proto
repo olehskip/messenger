@@ -1,0 +1,46 @@
+syntax = "proto3";
+option go_package="./pb";
+
+service AuthMs {
+	// Generates a new RT and a JWT
+	rpc GetNewRT(Credentials) returns (Tokens) {}
+	
+	// After thic call the old JWT should revoked and a new jwt are generated
+	// The call can be used e.g. when the old JWT will be expired soon
+	rpc ReplaceRT(JWT) returns (JWT) {}
+
+	// Geneterates a JWT based on the RT, if RT is invalid empty jwt is returned
+	rpc GetNewJWT(RT) returns (JWT) {}
+
+	rpc Revoke(Tokens) returns (RevokeResponse) {}
+
+	// Get a user based on the jwt
+	rpc GetUser(JWT) returns (User) {}
+}
+
+message Credentials {
+	string username = 1;
+	string password = 2;
+}
+
+message RT {
+	string rt = 1;
+}
+
+message JWT {
+	string jwt = 1;
+}
+
+message Tokens {
+	string rt = 1;
+	string jwt = 2;
+}
+
+message RevokeResponse {
+	string error = 1;
+}
+
+message User {
+	string id = 1;
+}
+
