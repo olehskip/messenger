@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/olegskip/messenger/pkg/authms/server"
 	"github.com/olegskip/messenger/pkg/authms/service"
+	"github.com/olegskip/messenger/pkg/authms/dal"
 
 	"log"
 )
@@ -37,7 +38,7 @@ func test(v *Vehicle) {
 func main() {
 	if err := server.NewGRPCServer(
 		service.NewAuthService(
-			new(service.InMemoryDAO),
+			new(dal.InMemoryDao),
 		),
 	).Run(); err != nil {
 		log.Fatalf("Can't run server; Error = %v", err)

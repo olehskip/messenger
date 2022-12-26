@@ -22,16 +22,16 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthMsClient interface {
-	// Generates a new RT and a JWT
-	GetNewRT(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Tokens, error)
-	// After thic call the old JWT should revoked and a new jwt are generated
-	// The call can be used e.g. when the old JWT will be expired soon
-	ReplaceRT(ctx context.Context, in *JWT, opts ...grpc.CallOption) (*JWT, error)
-	// Geneterates a JWT based on the RT, if RT is invalid empty jwt is returned
-	GetNewJWT(ctx context.Context, in *RT, opts ...grpc.CallOption) (*JWT, error)
+	// Generates a new Rt and a Jwt
+	GetNewRt(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Tokens, error)
+	// After thic call the old Jwt should revoked and a new jwt are generated
+	// The call can be used e.g. when the old Jwt will be expired soon
+	ExchangeRt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*Rt, error)
+	// Geneterates a Jwt based on the Rt, if Rt is invalid empty jwt is returned
+	GetNewJwt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*Jwt, error)
 	Revoke(ctx context.Context, in *Tokens, opts ...grpc.CallOption) (*RevokeResponse, error)
 	// Get a user based on the jwt
-	GetUser(ctx context.Context, in *JWT, opts ...grpc.CallOption) (*User, error)
+	GetUser(ctx context.Context, in *Jwt, opts ...grpc.CallOption) (*User, error)
 }
 
 type authMsClient struct {
@@ -42,27 +42,27 @@ func NewAuthMsClient(cc grpc.ClientConnInterface) AuthMsClient {
 	return &authMsClient{cc}
 }
 
-func (c *authMsClient) GetNewRT(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Tokens, error) {
+func (c *authMsClient) GetNewRt(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Tokens, error) {
 	out := new(Tokens)
-	err := c.cc.Invoke(ctx, "/AuthMs/GetNewRT", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/AuthMs/GetNewRt", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *authMsClient) ReplaceRT(ctx context.Context, in *JWT, opts ...grpc.CallOption) (*JWT, error) {
-	out := new(JWT)
-	err := c.cc.Invoke(ctx, "/AuthMs/ReplaceRT", in, out, opts...)
+func (c *authMsClient) ExchangeRt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*Rt, error) {
+	out := new(Rt)
+	err := c.cc.Invoke(ctx, "/AuthMs/ExchangeRt", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *authMsClient) GetNewJWT(ctx context.Context, in *RT, opts ...grpc.CallOption) (*JWT, error) {
-	out := new(JWT)
-	err := c.cc.Invoke(ctx, "/AuthMs/GetNewJWT", in, out, opts...)
+func (c *authMsClient) GetNewJwt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*Jwt, error) {
+	out := new(Jwt)
+	err := c.cc.Invoke(ctx, "/AuthMs/GetNewJwt", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (c *authMsClient) Revoke(ctx context.Context, in *Tokens, opts ...grpc.Call
 	return out, nil
 }
 
-func (c *authMsClient) GetUser(ctx context.Context, in *JWT, opts ...grpc.CallOption) (*User, error) {
+func (c *authMsClient) GetUser(ctx context.Context, in *Jwt, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
 	err := c.cc.Invoke(ctx, "/AuthMs/GetUser", in, out, opts...)
 	if err != nil {
@@ -91,16 +91,16 @@ func (c *authMsClient) GetUser(ctx context.Context, in *JWT, opts ...grpc.CallOp
 // All implementations must embed UnimplementedAuthMsServer
 // for forward compatibility
 type AuthMsServer interface {
-	// Generates a new RT and a JWT
-	GetNewRT(context.Context, *Credentials) (*Tokens, error)
-	// After thic call the old JWT should revoked and a new jwt are generated
-	// The call can be used e.g. when the old JWT will be expired soon
-	ReplaceRT(context.Context, *JWT) (*JWT, error)
-	// Geneterates a JWT based on the RT, if RT is invalid empty jwt is returned
-	GetNewJWT(context.Context, *RT) (*JWT, error)
+	// Generates a new Rt and a Jwt
+	GetNewRt(context.Context, *Credentials) (*Tokens, error)
+	// After thic call the old Jwt should revoked and a new jwt are generated
+	// The call can be used e.g. when the old Jwt will be expired soon
+	ExchangeRt(context.Context, *Rt) (*Rt, error)
+	// Geneterates a Jwt based on the Rt, if Rt is invalid empty jwt is returned
+	GetNewJwt(context.Context, *Rt) (*Jwt, error)
 	Revoke(context.Context, *Tokens) (*RevokeResponse, error)
 	// Get a user based on the jwt
-	GetUser(context.Context, *JWT) (*User, error)
+	GetUser(context.Context, *Jwt) (*User, error)
 	mustEmbedUnimplementedAuthMsServer()
 }
 
@@ -108,19 +108,19 @@ type AuthMsServer interface {
 type UnimplementedAuthMsServer struct {
 }
 
-func (UnimplementedAuthMsServer) GetNewRT(context.Context, *Credentials) (*Tokens, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetNewRT not implemented")
+func (UnimplementedAuthMsServer) GetNewRt(context.Context, *Credentials) (*Tokens, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNewRt not implemented")
 }
-func (UnimplementedAuthMsServer) ReplaceRT(context.Context, *JWT) (*JWT, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReplaceRT not implemented")
+func (UnimplementedAuthMsServer) ExchangeRt(context.Context, *Rt) (*Rt, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExchangeRt not implemented")
 }
-func (UnimplementedAuthMsServer) GetNewJWT(context.Context, *RT) (*JWT, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetNewJWT not implemented")
+func (UnimplementedAuthMsServer) GetNewJwt(context.Context, *Rt) (*Jwt, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNewJwt not implemented")
 }
 func (UnimplementedAuthMsServer) Revoke(context.Context, *Tokens) (*RevokeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Revoke not implemented")
 }
-func (UnimplementedAuthMsServer) GetUser(context.Context, *JWT) (*User, error) {
+func (UnimplementedAuthMsServer) GetUser(context.Context, *Jwt) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedAuthMsServer) mustEmbedUnimplementedAuthMsServer() {}
@@ -136,56 +136,56 @@ func RegisterAuthMsServer(s grpc.ServiceRegistrar, srv AuthMsServer) {
 	s.RegisterService(&AuthMs_ServiceDesc, srv)
 }
 
-func _AuthMs_GetNewRT_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthMs_GetNewRt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Credentials)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthMsServer).GetNewRT(ctx, in)
+		return srv.(AuthMsServer).GetNewRt(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/AuthMs/GetNewRT",
+		FullMethod: "/AuthMs/GetNewRt",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthMsServer).GetNewRT(ctx, req.(*Credentials))
+		return srv.(AuthMsServer).GetNewRt(ctx, req.(*Credentials))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthMs_ReplaceRT_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(JWT)
+func _AuthMs_ExchangeRt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Rt)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthMsServer).ReplaceRT(ctx, in)
+		return srv.(AuthMsServer).ExchangeRt(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/AuthMs/ReplaceRT",
+		FullMethod: "/AuthMs/ExchangeRt",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthMsServer).ReplaceRT(ctx, req.(*JWT))
+		return srv.(AuthMsServer).ExchangeRt(ctx, req.(*Rt))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthMs_GetNewJWT_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RT)
+func _AuthMs_GetNewJwt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Rt)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthMsServer).GetNewJWT(ctx, in)
+		return srv.(AuthMsServer).GetNewJwt(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/AuthMs/GetNewJWT",
+		FullMethod: "/AuthMs/GetNewJwt",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthMsServer).GetNewJWT(ctx, req.(*RT))
+		return srv.(AuthMsServer).GetNewJwt(ctx, req.(*Rt))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -209,7 +209,7 @@ func _AuthMs_Revoke_Handler(srv interface{}, ctx context.Context, dec func(inter
 }
 
 func _AuthMs_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(JWT)
+	in := new(Jwt)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func _AuthMs_GetUser_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: "/AuthMs/GetUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthMsServer).GetUser(ctx, req.(*JWT))
+		return srv.(AuthMsServer).GetUser(ctx, req.(*Jwt))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -234,16 +234,16 @@ var AuthMs_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AuthMsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetNewRT",
-			Handler:    _AuthMs_GetNewRT_Handler,
+			MethodName: "GetNewRt",
+			Handler:    _AuthMs_GetNewRt_Handler,
 		},
 		{
-			MethodName: "ReplaceRT",
-			Handler:    _AuthMs_ReplaceRT_Handler,
+			MethodName: "ExchangeRt",
+			Handler:    _AuthMs_ExchangeRt_Handler,
 		},
 		{
-			MethodName: "GetNewJWT",
-			Handler:    _AuthMs_GetNewJWT_Handler,
+			MethodName: "GetNewJwt",
+			Handler:    _AuthMs_GetNewJwt_Handler,
 		},
 		{
 			MethodName: "Revoke",
