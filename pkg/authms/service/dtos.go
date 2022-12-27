@@ -1,5 +1,9 @@
 package service
 
+import (
+	"time"
+)
+
 type CredentialsDto struct {
 	Username string
 	Password string
@@ -7,15 +11,15 @@ type CredentialsDto struct {
 
 type RtDto struct {
 	Token string
-	// UserId string
+	ExpireTimestamp time.Time
 }
 
 type JwtDto struct {
 	Token string
-	// UserId string
+	ExpireTimestamp time.Time
 }
 
 type TokensDto struct {
-	rt RtDto
-	jwt JwtDto
+	Rt RtDto
+	Jwt JwtDto
 }

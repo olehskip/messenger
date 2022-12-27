@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -22,15 +23,14 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthMsClient interface {
-	// Generates a new Rt and a Jwt
+	// generates a new Rt and a Jwt
 	GetNewRt(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Tokens, error)
-	// After thic call the old Jwt should revoked and a new jwt are generated
-	// The call can be used e.g. when the old Jwt will be expired soon
-	ExchangeRt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*Rt, error)
-	// Geneterates a Jwt based on the Rt, if Rt is invalid empty jwt is returned
-	GetNewJwt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*Jwt, error)
-	Revoke(ctx context.Context, in *Tokens, opts ...grpc.CallOption) (*RevokeResponse, error)
-	// Get a user based on the jwt
+	// after thic call the old tokens should revoked and a new pair of tokens are generated
+	ExchangeRt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*Tokens, error)
+	// revoke the rt
+	// can e.g. after log out
+	RevokeRt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// get the user's information based on the jwt
 	GetUser(ctx context.Context, in *Jwt, opts ...grpc.CallOption) (*User, error)
 }
 
@@ -51,8 +51,8 @@ func (c *authMsClient) GetNewRt(ctx context.Context, in *Credentials, opts ...gr
 	return out, nil
 }
 
-func (c *authMsClient) ExchangeRt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*Rt, error) {
-	out := new(Rt)
+func (c *authMsClient) ExchangeRt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*Tokens, error) {
+	out := new(Tokens)
 	err := c.cc.Invoke(ctx, "/AuthMs/ExchangeRt", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -60,18 +60,9 @@ func (c *authMsClient) ExchangeRt(ctx context.Context, in *Rt, opts ...grpc.Call
 	return out, nil
 }
 
-func (c *authMsClient) GetNewJwt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*Jwt, error) {
-	out := new(Jwt)
-	err := c.cc.Invoke(ctx, "/AuthMs/GetNewJwt", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authMsClient) Revoke(ctx context.Context, in *Tokens, opts ...grpc.CallOption) (*RevokeResponse, error) {
-	out := new(RevokeResponse)
-	err := c.cc.Invoke(ctx, "/AuthMs/Revoke", in, out, opts...)
+func (c *authMsClient) RevokeRt(ctx context.Context, in *Rt, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/AuthMs/RevokeRt", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -91,15 +82,14 @@ func (c *authMsClient) GetUser(ctx context.Context, in *Jwt, opts ...grpc.CallOp
 // All implementations must embed UnimplementedAuthMsServer
 // for forward compatibility
 type AuthMsServer interface {
-	// Generates a new Rt and a Jwt
+	// generates a new Rt and a Jwt
 	GetNewRt(context.Context, *Credentials) (*Tokens, error)
-	// After thic call the old Jwt should revoked and a new jwt are generated
-	// The call can be used e.g. when the old Jwt will be expired soon
-	ExchangeRt(context.Context, *Rt) (*Rt, error)
-	// Geneterates a Jwt based on the Rt, if Rt is invalid empty jwt is returned
-	GetNewJwt(context.Context, *Rt) (*Jwt, error)
-	Revoke(context.Context, *Tokens) (*RevokeResponse, error)
-	// Get a user based on the jwt
+	// after thic call the old tokens should revoked and a new pair of tokens are generated
+	ExchangeRt(context.Context, *Rt) (*Tokens, error)
+	// revoke the rt
+	// can e.g. after log out
+	RevokeRt(context.Context, *Rt) (*emptypb.Empty, error)
+	// get the user's information based on the jwt
 	GetUser(context.Context, *Jwt) (*User, error)
 	mustEmbedUnimplementedAuthMsServer()
 }
@@ -111,14 +101,11 @@ type UnimplementedAuthMsServer struct {
 func (UnimplementedAuthMsServer) GetNewRt(context.Context, *Credentials) (*Tokens, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewRt not implemented")
 }
-func (UnimplementedAuthMsServer) ExchangeRt(context.Context, *Rt) (*Rt, error) {
+func (UnimplementedAuthMsServer) ExchangeRt(context.Context, *Rt) (*Tokens, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExchangeRt not implemented")
 }
-func (UnimplementedAuthMsServer) GetNewJwt(context.Context, *Rt) (*Jwt, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetNewJwt not implemented")
-}
-func (UnimplementedAuthMsServer) Revoke(context.Context, *Tokens) (*RevokeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Revoke not implemented")
+func (UnimplementedAuthMsServer) RevokeRt(context.Context, *Rt) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeRt not implemented")
 }
 func (UnimplementedAuthMsServer) GetUser(context.Context, *Jwt) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
@@ -172,38 +159,20 @@ func _AuthMs_ExchangeRt_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthMs_GetNewJwt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthMs_RevokeRt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Rt)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthMsServer).GetNewJwt(ctx, in)
+		return srv.(AuthMsServer).RevokeRt(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/AuthMs/GetNewJwt",
+		FullMethod: "/AuthMs/RevokeRt",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthMsServer).GetNewJwt(ctx, req.(*Rt))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AuthMs_Revoke_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Tokens)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthMsServer).Revoke(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/AuthMs/Revoke",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthMsServer).Revoke(ctx, req.(*Tokens))
+		return srv.(AuthMsServer).RevokeRt(ctx, req.(*Rt))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -242,12 +211,8 @@ var AuthMs_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthMs_ExchangeRt_Handler,
 		},
 		{
-			MethodName: "GetNewJwt",
-			Handler:    _AuthMs_GetNewJwt_Handler,
-		},
-		{
-			MethodName: "Revoke",
-			Handler:    _AuthMs_Revoke_Handler,
+			MethodName: "RevokeRt",
+			Handler:    _AuthMs_RevokeRt_Handler,
 		},
 		{
 			MethodName: "GetUser",

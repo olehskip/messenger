@@ -1,20 +1,20 @@
 syntax = "proto3";
 option go_package="./pb";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 service AuthMs {
-	// Generates a new Rt and a Jwt
+	// generates a new Rt and a Jwt
 	rpc GetNewRt(Credentials) returns (Tokens) {}
 	
-	// After thic call the old Jwt should revoked and a new jwt are generated
-	// The call can be used e.g. when the old Jwt will be expired soon
-	rpc ExchangeRt(Rt) returns (Rt) {}
+	// after thic call the old tokens should revoked and a new pair of tokens are generated
+	rpc ExchangeRt(Rt) returns (Tokens) {}
 
-	// Geneterates a Jwt based on the Rt, if Rt is invalid empty jwt is returned
-	rpc GetNewJwt(Rt) returns (Jwt) {}
+	// revoke the rt
+	// can e.g. after log out
+	rpc RevokeRt(Rt) returns (google.protobuf.Empty) {}
 
-	rpc Revoke(Tokens) returns (RevokeResponse) {}
-
-	// Get a user based on the jwt
+	// get the user's information based on the jwt
 	rpc GetUser(Jwt) returns (User) {}
 }
 
@@ -25,19 +25,17 @@ message Credentials {
 
 message Rt {
 	string token = 1;
+	google.protobuf.Timestamp expireTimestamp = 2;
 }
 
 message Jwt {
 	string token = 1;
+	google.protobuf.Timestamp expireTimestamp = 2;
 }
 
 message Tokens {
 	Rt rt = 1;
 	Jwt jwt = 2;
-}
-
-message RevokeResponse {
-	string error = 1;
 }
 
 message User {

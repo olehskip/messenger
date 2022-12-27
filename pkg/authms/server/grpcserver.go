@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type GrpcServer struct {
@@ -18,7 +20,7 @@ type GrpcServer struct {
 }
 
 func (g *GrpcServer) GetNewRt(ctx context.Context, req *pb.Credentials) (*pb.Tokens, error) {
-	rt, jwt, err := g.service.GetNewRt(
+	tokens, err := g.service.GetNewRt(
 		service.CredentialsDto {
 			Username: req.Username, 
 			Password: req.Password,
@@ -28,22 +30,24 @@ func (g *GrpcServer) GetNewRt(ctx context.Context, req *pb.Credentials) (*pb.Tok
 	if err != nil {
 		return nil, err
 	}
-
-	return &pb.Tokens{Jwt: &pb.Jwt{Token: jwt.Token}, Rt: &pb.Rt{Token: rt.Token}}, nil
+	
+	tokensPb := dtoToPbTokens(tokens)
+	return &tokensPb, nil
 }
 
-func (g *GrpcServer) ExchangeRt(ctx context.Context, req *pb.Rt) (*pb.Rt, error) {
-	rt, err := g.service.ExchangeRt(
-		service.RtDto {
-			Token: req.Token, 
-		},
-	)
+func (g *GrpcServer) ExchangeRt(ctx context.Context, req *pb.Rt) (*pb.Tokens, error) {
+	tokens, err := g.service.ExchangeRt(pbToDtoRt(req))
 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return &pb.Rt{Token: rt.Token}, nil
+	tokensPb := dtoToPbTokens(tokens)
+	return &tokensPb, nil
+}
+
+func (g *GrpcServer) RevokeRt(ctx context.Context, req *pb.Rt) (*emptypb.Empty, error) {
+	return new(emptypb.Empty), g.service.RevokeRt(pbToDtoRt(req))
 }
 
 func (g *GrpcServer) Run() error {
@@ -63,3 +67,32 @@ func NewGRPCServer(service service.IAuthService) *GrpcServer {
 	return &ans
 }
 
+func dtoToPbRt(rtDto service.RtDto) (pb.Rt) {
+	return pb.Rt {
+		Token: rtDto.Token,
+		ExpireTimestamp: timestamppb.New(rtDto.ExpireTimestamp),
+	}
+}
+
+func dtoToPbJwt(jwtDto service.JwtDto) (pb.Jwt) {
+	return pb.Jwt {
+		Token: jwtDto.Token,
+		ExpireTimestamp: timestamppb.New(jwtDto.ExpireTimestamp),
+	}
+}
+
+func dtoToPbTokens(tokensDto service.TokensDto) (pb.Tokens) {
+	rtPb := dtoToPbRt(tokensDto.Rt)
+	jwtPb := dtoToPbJwt(tokensDto.Jwt)
+	return pb.Tokens {
+		Rt: &rtPb, 
+		Jwt: &jwtPb,
+	}
+}
+
+func pbToDtoRt(rtPb *pb.Rt) (rtDto service.RtDto) {
+	return service.RtDto {
+		Token: rtPb.Token,
+		ExpireTimestamp: rtPb.ExpireTimestamp.AsTime(),
+	}
+}
