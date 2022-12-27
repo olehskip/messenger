@@ -19,8 +19,8 @@ type GrpcServer struct {
 	service service.IAuthService
 }
 
-func (g *GrpcServer) GetNewRt(ctx context.Context, req *pb.Credentials) (*pb.Tokens, error) {
-	tokens, err := g.service.GetNewRt(
+func (g *GrpcServer) GetNewRefreshToken(ctx context.Context, req *pb.Credentials) (*pb.Tokens, error) {
+	tokens, err := g.service.GetNewRefreshToken(
 		service.CredentialsDto {
 			Username: req.Username, 
 			Password: req.Password,
@@ -35,8 +35,8 @@ func (g *GrpcServer) GetNewRt(ctx context.Context, req *pb.Credentials) (*pb.Tok
 	return &tokensPb, nil
 }
 
-func (g *GrpcServer) ExchangeRt(ctx context.Context, req *pb.Rt) (*pb.Tokens, error) {
-	tokens, err := g.service.ExchangeRt(pbToDtoRt(req))
+func (g *GrpcServer) ExchangeRefreshToken(ctx context.Context, req *pb.RefreshToken) (*pb.Tokens, error) {
+	tokens, err := g.service.ExchangeRefreshToken(pbToDtoRefreshToken(req))
 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -46,8 +46,8 @@ func (g *GrpcServer) ExchangeRt(ctx context.Context, req *pb.Rt) (*pb.Tokens, er
 	return &tokensPb, nil
 }
 
-func (g *GrpcServer) RevokeRt(ctx context.Context, req *pb.Rt) (*emptypb.Empty, error) {
-	return new(emptypb.Empty), g.service.RevokeRt(pbToDtoRt(req))
+func (g *GrpcServer) RevokeRefreshToken(ctx context.Context, req *pb.RefreshToken) (*emptypb.Empty, error) {
+	return new(emptypb.Empty), g.service.RevokeRefreshToken(pbToDtoRefreshToken(req))
 }
 
 func (g *GrpcServer) Run() error {
@@ -67,32 +67,32 @@ func NewGRPCServer(service service.IAuthService) *GrpcServer {
 	return &ans
 }
 
-func dtoToPbRt(rtDto service.RtDto) (pb.Rt) {
-	return pb.Rt {
-		Token: rtDto.Token,
-		ExpireTimestamp: timestamppb.New(rtDto.ExpireTimestamp),
+func dtoToPbRefreshToken(refreshTokenDto service.RefreshTokenDto) (pb.RefreshToken) {
+	return pb.RefreshToken {
+		Token: refreshTokenDto.Token,
+		ExpireTimestamp: timestamppb.New(refreshTokenDto.ExpireTimestamp),
 	}
 }
 
-func dtoToPbJwt(jwtDto service.JwtDto) (pb.Jwt) {
-	return pb.Jwt {
-		Token: jwtDto.Token,
-		ExpireTimestamp: timestamppb.New(jwtDto.ExpireTimestamp),
+func dtoToPbAccessToken(accessTokenDto service.AccessTokenDto) (pb.AccessToken) {
+	return pb.AccessToken {
+		Token: accessTokenDto.Token,
+		ExpireTimestamp: timestamppb.New(accessTokenDto.ExpireTimestamp),
 	}
 }
 
 func dtoToPbTokens(tokensDto service.TokensDto) (pb.Tokens) {
-	rtPb := dtoToPbRt(tokensDto.Rt)
-	jwtPb := dtoToPbJwt(tokensDto.Jwt)
+	refreshTokenPb := dtoToPbRefreshToken(tokensDto.RefreshToken)
+	accessTokenPb := dtoToPbAccessToken(tokensDto.AccessToken)
 	return pb.Tokens {
-		Rt: &rtPb, 
-		Jwt: &jwtPb,
+		RefreshToken: &refreshTokenPb, 
+		AccessToken: &accessTokenPb,
 	}
 }
 
-func pbToDtoRt(rtPb *pb.Rt) (rtDto service.RtDto) {
-	return service.RtDto {
-		Token: rtPb.Token,
-		ExpireTimestamp: rtPb.ExpireTimestamp.AsTime(),
+func pbToDtoRefreshToken(refreshTokenPb *pb.RefreshToken) (rtDto service.RefreshTokenDto) {
+	return service.RefreshTokenDto {
+		Token: refreshTokenPb.Token,
+		ExpireTimestamp: refreshTokenPb.ExpireTimestamp.AsTime(),
 	}
 }

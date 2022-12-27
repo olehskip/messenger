@@ -4,18 +4,18 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
 service AuthMs {
-	// generates a new Rt and a Jwt
-	rpc GetNewRt(Credentials) returns (Tokens) {}
+	// generates a new RefreshToken and a AccessToken
+	rpc GetNewRefreshToken(Credentials) returns (Tokens) {}
 	
 	// after thic call the old tokens should revoked and a new pair of tokens are generated
-	rpc ExchangeRt(Rt) returns (Tokens) {}
+	rpc ExchangeRefreshToken(RefreshToken) returns (Tokens) {}
 
-	// revoke the rt
+	// revoke the refreshToken
 	// can e.g. after log out
-	rpc RevokeRt(Rt) returns (google.protobuf.Empty) {}
+	rpc RevokeRefreshToken(RefreshToken) returns (google.protobuf.Empty) {}
 
-	// get the user's information based on the jwt
-	rpc GetUser(Jwt) returns (User) {}
+	// get the user's information based on the accessToken
+	rpc GetUser(AccessToken) returns (User) {}
 }
 
 message Credentials {
@@ -23,19 +23,19 @@ message Credentials {
 	string password = 2;
 }
 
-message Rt {
+message RefreshToken {
 	string token = 1;
 	google.protobuf.Timestamp expireTimestamp = 2;
 }
 
-message Jwt {
+message AccessToken {
 	string token = 1;
 	google.protobuf.Timestamp expireTimestamp = 2;
 }
 
 message Tokens {
-	Rt rt = 1;
-	Jwt jwt = 2;
+	RefreshToken refreshToken = 1;
+	AccessToken accessToken = 2;
 }
 
 message User {

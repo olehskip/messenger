@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type RtModel struct {
+type RefreshTokenModel struct {
 	Token string
 	ExpireTimestamp time.Time
 }

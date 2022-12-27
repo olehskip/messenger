@@ -8,23 +8,23 @@ import (
 )
 
 type IAuthService interface {
-	GetNewRt(credentials CredentialsDto) (tokens TokensDto, err error)
-	ExchangeRt(oldRt RtDto) (tokens TokensDto, err error)
-	RevokeRt(oldRt RtDto) (err error)
-	ValidateRt(rt RtDto) (err error)
+	GetNewRefreshToken(credentials CredentialsDto) (tokens TokensDto, err error)
+	ExchangeRefreshToken(oldRefreshToken RefreshTokenDto) (tokens TokensDto, err error)
+	RevokeRefreshToken(oldRefreshToken RefreshTokenDto) (err error)
+	ValidateRefreshToken(refreshToken RefreshTokenDto) (err error)
 }
 
 type AuthService struct {
-	tokenDao dal.ITokenDao
-	rtTtl time.Duration
+	revokedRefreshTokenDao dal.IRevokedRefreshTokenDao
+	refreshTokenTtl time.Duration
 	jwtTtl time.Duration
 }
 
-func (a *AuthService) GetNewRt(credentials CredentialsDto) (tokens TokensDto, err error) {
+func (a *AuthService) GetNewRefreshToken(credentials CredentialsDto) (tokens TokensDto, err error) {
 	// Just for testing, if login equsl to password then return fake token		
 	if credentials.Username == credentials.Password {
-		tokens.Rt = a.generateRt()
-		tokens.Jwt = a.generateJwt(tokens.Rt)
+		tokens.RefreshToken = a.generateRefreshToken()
+		tokens.AccessToken = a.generateAccessToken(tokens.RefreshToken)
 		err = nil
 	} else {
 		err = errors.New("Invalid username or password")
@@ -33,40 +33,40 @@ func (a *AuthService) GetNewRt(credentials CredentialsDto) (tokens TokensDto, er
 	return tokens, err
 }
 
-func (a *AuthService) ExchangeRt(oldRt RtDto) (tokens TokensDto, err error) {
-	if validationErr := a.ValidateRt(oldRt); validationErr != nil {
-		return TokensDto{}, errors.New("Rt is invalid") 
+func (a *AuthService) ExchangeRefreshToken(oldRefreshToken RefreshTokenDto) (tokens TokensDto, err error) {
+	if validationErr := a.ValidateRefreshToken(oldRefreshToken); validationErr != nil {
+		return TokensDto{}, errors.New("RefreshToken is invalid") 
 	}
 	// revoke the old refresh token to prevent creating multiple access tokens
-	// if oldRt is already revoked we can't give an access token
-	if revokingErr := a.RevokeRt(oldRt); revokingErr != nil {
-		return TokensDto{}, errors.New("Rt is revoked")
+	// if oldRefreshToken is already revoked we can't give an access token
+	if revokingErr := a.RevokeRefreshToken(oldRefreshToken); revokingErr != nil {
+		return TokensDto{}, errors.New("RefreshToken is revoked")
 	}
 
-	tokens.Rt = a.generateRt()
-	tokens.Jwt = a.generateJwt(tokens.Rt)
+	tokens.RefreshToken = a.generateRefreshToken()
+	tokens.AccessToken = a.generateAccessToken(tokens.RefreshToken)
 
 	return tokens, nil 
 }
 
-func (a *AuthService) RevokeRt(oldRt RtDto) (err error) {
-	if validationErr := a.ValidateRt(oldRt); validationErr != nil {
-		return errors.New("Rt is invalid") 
+func (a *AuthService) RevokeRefreshToken(oldRefreshToken RefreshTokenDto) (err error) {
+	if validationErr := a.ValidateRefreshToken(oldRefreshToken); validationErr != nil {
+		return errors.New("RefreshToken is invalid") 
 	}
 	
-	_, findingErr := a.tokenDao.FindRTByToken(oldRt.Token)
+	_, findingErr := a.revokedRefreshTokenDao.FindRefreshTokenByToken(oldRefreshToken.Token)
 	if findingErr == nil {
-		return errors.New("Rt is already revoked") 
+		return errors.New("RefreshToken is already revoked") 
 	}
 
-	a.tokenDao.AddRt(dtoToModelRt(oldRt))
+	a.revokedRefreshTokenDao.AddRefreshToken(dtoToModelRefreshToken(oldRefreshToken))
 
 	return nil
 }
 
-func (a *AuthService) ValidateRt(rt RtDto) (err error) {
-	if time.Now().After(rt.ExpireTimestamp) {	
-		return errors.New("Rt is expired") 
+func (a *AuthService) ValidateRefreshToken(refreshToken RefreshTokenDto) (err error) {
+	if time.Now().After(refreshToken.ExpireTimestamp) {	
+		return errors.New("RefreshToken is expired") 
 	}
 	
 	// TODO: actual validating
@@ -74,31 +74,31 @@ func (a *AuthService) ValidateRt(rt RtDto) (err error) {
 	return nil
 }
 
-func (a *AuthService) generateRt() (rt RtDto) {
-	rt.Token = time.Now().String()
-	rt.ExpireTimestamp = time.Now().Add(a.rtTtl)
+func (a *AuthService) generateRefreshToken() (refreshToken RefreshTokenDto) {
+	refreshToken.Token = time.Now().String()
+	refreshToken.ExpireTimestamp = time.Now().Add(a.refreshTokenTtl)
 
-	return rt
+	return refreshToken
 }
 
-func (a *AuthService) generateJwt(rt RtDto) (jwt JwtDto) {
-	jwt.Token = time.Now().String() + "." + rt.Token
+func (a *AuthService) generateAccessToken(refreshToken RefreshTokenDto) (jwt AccessTokenDto) {
+	jwt.Token = time.Now().String() + "." + refreshToken.Token
 	jwt.ExpireTimestamp = time.Now().Add(a.jwtTtl)
 
 	return jwt
 }
 
-func NewAuthService(tokenDAO dal.ITokenDao, rtTtl time.Duration) *AuthService {
+func NewAuthService(revokedRefreshTokenDao dal.IRevokedRefreshTokenDao, refreshTokenTtl time.Duration) *AuthService {
 	return &AuthService{ 
-		tokenDao: tokenDAO,
-		rtTtl: rtTtl,
+		revokedRefreshTokenDao: revokedRefreshTokenDao,
+		refreshTokenTtl: refreshTokenTtl,
 	}
 }
 
-func dtoToModelRt(rtDto RtDto) (rtModel dal.RtModel) {
-	rtModel.Token = rtDto.Token
-	rtModel.ExpireTimestamp = rtDto.ExpireTimestamp
+func dtoToModelRefreshToken(refreshTokenDto RefreshTokenDto) (refreshTokenModel dal.RefreshTokenModel) {
+	refreshTokenModel.Token = refreshTokenDto.Token
+	refreshTokenModel.ExpireTimestamp = refreshTokenDto.ExpireTimestamp
 
-	return rtModel
+	return refreshTokenModel
 }
 

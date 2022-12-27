@@ -4,26 +4,26 @@ import (
 	"errors"
 )
 
-type ITokenDao interface {
-	AddRt(rt RtModel)
-	FindRTByToken(rtToken string) (RtModel, error)
+type IRevokedRefreshTokenDao interface {
+	AddRefreshToken(rt RefreshTokenModel)
+	FindRefreshTokenByToken(rtToken string) (RefreshTokenModel, error)
 }
 
 type InMemoryDao struct {	
-	rts []RtModel
+	rts []RefreshTokenModel
 }
 
-func (i *InMemoryDao) AddRt(rt RtModel) {
+func (i *InMemoryDao) AddRefreshToken(rt RefreshTokenModel) {
 	i.rts = append(i.rts, rt)
 }
 
-func (i *InMemoryDao) FindRTByToken(token string) (RtModel, error) {
+func (i *InMemoryDao) FindRefreshTokenByToken(token string) (RefreshTokenModel, error) {
 	for _, tokenModel := range(i.rts) {
 		if tokenModel.Token == token {
 			return tokenModel, nil
 		}
 	}
 	
-	return RtModel{}, errors.New("RT wasn't found")
+	return RefreshTokenModel{}, errors.New("RT wasn't found")
 }
 

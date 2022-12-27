@@ -9,17 +9,17 @@ type CredentialsDto struct {
 	Password string
 }
 
-type RtDto struct {
+type RefreshTokenDto struct {
 	Token string
 	ExpireTimestamp time.Time
 }
 
-type JwtDto struct {
+type AccessTokenDto struct {
 	Token string
 	ExpireTimestamp time.Time
 }
 
 type TokensDto struct {
-	Rt RtDto
-	Jwt JwtDto
+	RefreshToken RefreshTokenDto
+	AccessToken AccessTokenDto
 }
