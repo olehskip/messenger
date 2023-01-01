@@ -4,8 +4,12 @@ import (
 	"time"
 )
 
-type RefreshTokenModel struct {
-	Token string
-	ExpireTimestamp time.Time
+type TokensPairModel struct {
+	IsRevoked bool
+	HRefreshToken string
+	RefreshTokenExpiryTimestamp time.Time
+	HAccessToken string
+	AccessTokenExpiryTimestamp time.Time
+	UserUuid string
 }
 

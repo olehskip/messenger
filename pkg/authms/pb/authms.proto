@@ -1,6 +1,5 @@
 syntax = "proto3";
 option go_package="./pb";
-import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
 service AuthMs {
@@ -15,30 +14,29 @@ service AuthMs {
 	rpc RevokeRefreshToken(RefreshToken) returns (google.protobuf.Empty) {}
 
 	// get the user's information based on the accessToken
-	rpc GetUser(AccessToken) returns (User) {}
+	rpc GetTokenOwner(AccessToken) returns (TokenOwner) {}
 }
 
 message Credentials {
-	string username = 1;
+	string uuid = 1;
 	string password = 2;
 }
 
 message RefreshToken {
-	string token = 1;
-	google.protobuf.Timestamp expireTimestamp = 2;
+	string hashedRefreshToken = 1;
 }
 
 message AccessToken {
-	string token = 1;
-	google.protobuf.Timestamp expireTimestamp = 2;
+	string hashedAccessToken = 1;
 }
 
 message Tokens {
-	RefreshToken refreshToken = 1;
-	AccessToken accessToken = 2;
+	string hashedRefreshToken = 1;
+	string hashedAccessToken = 2;
 }
 
-message User {
-	string id = 1;
+message TokenOwner {
+	string uuid = 1;
+	bool isTokenRevoked = 2;
 }
 

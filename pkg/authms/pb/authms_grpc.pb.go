@@ -31,7 +31,7 @@ type AuthMsClient interface {
 	// can e.g. after log out
 	RevokeRefreshToken(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// get the user's information based on the accessToken
-	GetUser(ctx context.Context, in *AccessToken, opts ...grpc.CallOption) (*User, error)
+	GetTokenOwner(ctx context.Context, in *AccessToken, opts ...grpc.CallOption) (*TokenOwner, error)
 }
 
 type authMsClient struct {
@@ -69,9 +69,9 @@ func (c *authMsClient) RevokeRefreshToken(ctx context.Context, in *RefreshToken,
 	return out, nil
 }
 
-func (c *authMsClient) GetUser(ctx context.Context, in *AccessToken, opts ...grpc.CallOption) (*User, error) {
-	out := new(User)
-	err := c.cc.Invoke(ctx, "/AuthMs/GetUser", in, out, opts...)
+func (c *authMsClient) GetTokenOwner(ctx context.Context, in *AccessToken, opts ...grpc.CallOption) (*TokenOwner, error) {
+	out := new(TokenOwner)
+	err := c.cc.Invoke(ctx, "/AuthMs/GetTokenOwner", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ type AuthMsServer interface {
 	// can e.g. after log out
 	RevokeRefreshToken(context.Context, *RefreshToken) (*emptypb.Empty, error)
 	// get the user's information based on the accessToken
-	GetUser(context.Context, *AccessToken) (*User, error)
+	GetTokenOwner(context.Context, *AccessToken) (*TokenOwner, error)
 	mustEmbedUnimplementedAuthMsServer()
 }
 
@@ -107,8 +107,8 @@ func (UnimplementedAuthMsServer) ExchangeRefreshToken(context.Context, *RefreshT
 func (UnimplementedAuthMsServer) RevokeRefreshToken(context.Context, *RefreshToken) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RevokeRefreshToken not implemented")
 }
-func (UnimplementedAuthMsServer) GetUser(context.Context, *AccessToken) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+func (UnimplementedAuthMsServer) GetTokenOwner(context.Context, *AccessToken) (*TokenOwner, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenOwner not implemented")
 }
 func (UnimplementedAuthMsServer) mustEmbedUnimplementedAuthMsServer() {}
 
@@ -177,20 +177,20 @@ func _AuthMs_RevokeRefreshToken_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthMs_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthMs_GetTokenOwner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AccessToken)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthMsServer).GetUser(ctx, in)
+		return srv.(AuthMsServer).GetTokenOwner(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/AuthMs/GetUser",
+		FullMethod: "/AuthMs/GetTokenOwner",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthMsServer).GetUser(ctx, req.(*AccessToken))
+		return srv.(AuthMsServer).GetTokenOwner(ctx, req.(*AccessToken))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -215,8 +215,8 @@ var AuthMs_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthMs_RevokeRefreshToken_Handler,
 		},
 		{
-			MethodName: "GetUser",
-			Handler:    _AuthMs_GetUser_Handler,
+			MethodName: "GetTokenOwner",
+			Handler:    _AuthMs_GetTokenOwner_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

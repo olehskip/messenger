@@ -2,103 +2,96 @@ package service
 
 import (
 	"errors"
-	"time"
 
 	"github.com/olegskip/messenger/pkg/authms/dal"
 )
 
 type IAuthService interface {
-	GetNewRefreshToken(credentials CredentialsDto) (tokens TokensDto, err error)
-	ExchangeRefreshToken(oldRefreshToken RefreshTokenDto) (tokens TokensDto, err error)
-	RevokeRefreshToken(oldRefreshToken RefreshTokenDto) (err error)
-	ValidateRefreshToken(refreshToken RefreshTokenDto) (err error)
+	GetNewRefreshToken(credentials CredentialsDto) (hTokens HTokensPairDto, err error)
+	ExchangeRefreshToken(oldHRefreshToken string) (hTokens HTokensPairDto, err error)
+	RevokeRefreshToken(oldHRefreshToken string) (err error)
+	GetUserUuid(hRefreshToken string) (uuid string, isRevoked bool, err error)
 }
 
 type AuthService struct {
-	revokedRefreshTokenDao dal.IRevokedRefreshTokenDao
-	refreshTokenTtl time.Duration
-	jwtTtl time.Duration
+	tokensPairDao dal.ITokensPairDao
+	refreshTokensGenerator ITokensGenerator
+	accessTokensGenerator ITokensGenerator
 }
 
-func (a *AuthService) GetNewRefreshToken(credentials CredentialsDto) (tokens TokensDto, err error) {
-	// Just for testing, if login equsl to password then return fake token		
-	if credentials.Username == credentials.Password {
-		tokens.RefreshToken = a.generateRefreshToken()
-		tokens.AccessToken = a.generateAccessToken(tokens.RefreshToken)
+func (a *AuthService) GetNewRefreshToken(credentials CredentialsDto) (hTokens HTokensPairDto, err error){
+	if credentials.Password == "pass" {
+		hTokens.HashedRefreshToken, hTokens.HashedAccessToken = a.generateAndSaveTokensPair(credentials.UserUuid)
 		err = nil
 	} else {
-		err = errors.New("Invalid username or password")
+		err = errors.New("invalid username or password")
 	}
 	
-	return tokens, err
+	return hTokens, err
 }
 
-func (a *AuthService) ExchangeRefreshToken(oldRefreshToken RefreshTokenDto) (tokens TokensDto, err error) {
-	if validationErr := a.ValidateRefreshToken(oldRefreshToken); validationErr != nil {
-		return TokensDto{}, errors.New("RefreshToken is invalid") 
+func (a *AuthService) ExchangeRefreshToken(oldHRefreshToken string) (hTokens HTokensPairDto, err error){
+	userUuid, isRevoked, findingErr := a.tokensPairDao.GetUserUuidByHRefreshToken(oldHRefreshToken)
+
+	if isRevoked {
+		return HTokensPairDto{}, errors.New("old refresh token is revoked")
 	}
+
+	if findingErr != nil {
+		return HTokensPairDto{}, findingErr
+	}
+
 	// revoke the old refresh token to prevent creating multiple access tokens
 	// if oldRefreshToken is already revoked we can't give an access token
-	if revokingErr := a.RevokeRefreshToken(oldRefreshToken); revokingErr != nil {
-		return TokensDto{}, errors.New("RefreshToken is revoked")
+	if revokingErr := a.tokensPairDao.RevokeTokensPair(oldHRefreshToken); revokingErr != nil {
+		return HTokensPairDto{}, revokingErr
 	}
 
-	tokens.RefreshToken = a.generateRefreshToken()
-	tokens.AccessToken = a.generateAccessToken(tokens.RefreshToken)
-
-	return tokens, nil 
+	hTokens.HashedRefreshToken, hTokens.HashedAccessToken = a.generateAndSaveTokensPair(userUuid)
+	
+	return hTokens, nil 
 }
 
-func (a *AuthService) RevokeRefreshToken(oldRefreshToken RefreshTokenDto) (err error) {
-	if validationErr := a.ValidateRefreshToken(oldRefreshToken); validationErr != nil {
-		return errors.New("RefreshToken is invalid") 
+func (a *AuthService) RevokeRefreshToken(oldHRefreshToken string) (err error) {
+	if revokingErr := a.tokensPairDao.RevokeTokensPair(oldHRefreshToken); revokingErr != nil {
+		return revokingErr 
 	}
 	
-	_, findingErr := a.revokedRefreshTokenDao.FindRefreshTokenByToken(oldRefreshToken.Token)
-	if findingErr == nil {
-		return errors.New("RefreshToken is already revoked") 
-	}
-
-	a.revokedRefreshTokenDao.AddRefreshToken(dtoToModelRefreshToken(oldRefreshToken))
-
 	return nil
 }
 
-func (a *AuthService) ValidateRefreshToken(refreshToken RefreshTokenDto) (err error) {
-	if time.Now().After(refreshToken.ExpireTimestamp) {	
-		return errors.New("RefreshToken is expired") 
-	}
+func (a *AuthService) GetUserUuid(hAccessToken string) (uuid string, isRevoked bool, err error) {
+	return a.tokensPairDao.GetUserUuidByHAcessToken(hAccessToken)
+}
+
+func (a *AuthService) generateAndSaveTokensPair(userUuid string) (hRefreshToken string, hAccessToken string) {
+	refreshToken := a.refreshTokensGenerator.GenerateToken(userUuid)
+	hRefreshToken = a.refreshTokensGenerator.GenerateHashedToken(refreshToken)
 	
-	// TODO: actual validating
+	accessToken := a.accessTokensGenerator.GenerateToken(userUuid)
+	hAccessToken = a.accessTokensGenerator.GenerateHashedToken(accessToken)
 
-	return nil
+	a.tokensPairDao.AddTokensPair(toTokensPairModel(refreshToken, hRefreshToken, accessToken, hAccessToken))
+
+	return hRefreshToken, hAccessToken
 }
 
-func (a *AuthService) generateRefreshToken() (refreshToken RefreshTokenDto) {
-	refreshToken.Token = time.Now().String()
-	refreshToken.ExpireTimestamp = time.Now().Add(a.refreshTokenTtl)
-
-	return refreshToken
-}
-
-func (a *AuthService) generateAccessToken(refreshToken RefreshTokenDto) (jwt AccessTokenDto) {
-	jwt.Token = time.Now().String() + "." + refreshToken.Token
-	jwt.ExpireTimestamp = time.Now().Add(a.jwtTtl)
-
-	return jwt
-}
-
-func NewAuthService(revokedRefreshTokenDao dal.IRevokedRefreshTokenDao, refreshTokenTtl time.Duration) *AuthService {
-	return &AuthService{ 
-		revokedRefreshTokenDao: revokedRefreshTokenDao,
-		refreshTokenTtl: refreshTokenTtl,
+func NewAuthService(tokensPairDao dal.ITokensPairDao, refreshTokensGenerator ITokensGenerator, accessTokensGenerator ITokensGenerator) *AuthService {
+	return &AuthService{
+		tokensPairDao: tokensPairDao,
+		refreshTokensGenerator: refreshTokensGenerator,
+		accessTokensGenerator: accessTokensGenerator,
 	}
 }
 
-func dtoToModelRefreshToken(refreshTokenDto RefreshTokenDto) (refreshTokenModel dal.RefreshTokenModel) {
-	refreshTokenModel.Token = refreshTokenDto.Token
-	refreshTokenModel.ExpireTimestamp = refreshTokenDto.ExpireTimestamp
-
-	return refreshTokenModel
+func toTokensPairModel(refreshToken Token, hRefreshToken string, accessToken Token, hAccessToken string) dal.TokensPairModel {
+	return dal.TokensPairModel {
+		IsRevoked: false,
+		HRefreshToken: hRefreshToken,
+		RefreshTokenExpiryTimestamp: refreshToken.ExpiryTimestamp,
+		HAccessToken: hAccessToken,
+		AccessTokenExpiryTimestamp: accessToken.ExpiryTimestamp,
+		UserUuid: refreshToken.UserUuid,
+	}
 }
 

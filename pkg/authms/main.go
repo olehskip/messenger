@@ -29,7 +29,8 @@ func main() {
 	if err := server.NewGRPCServer(
 		service.NewAuthService(
 			new(dal.InMemoryDao),
-			30 * time.Second,
+			service.NewTokensGenerator("secret-refresh", 2 * time.Minute),
+			service.NewTokensGenerator("secret-access", 25 * time.Second),
 		),
 	).Run(); err != nil {
 		log.Fatalf("Can't run server; Error = %v", err)

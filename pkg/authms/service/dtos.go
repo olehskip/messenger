@@ -1,25 +1,11 @@
 package service
 
-import (
-	"time"
-)
-
 type CredentialsDto struct {
-	Username string
+	UserUuid string
 	Password string
 }
 
-type RefreshTokenDto struct {
-	Token string
-	ExpireTimestamp time.Time
-}
-
-type AccessTokenDto struct {
-	Token string
-	ExpireTimestamp time.Time
-}
-
-type TokensDto struct {
-	RefreshToken RefreshTokenDto
-	AccessToken AccessTokenDto
+type HTokensPairDto struct {
+	HashedRefreshToken string
+	HashedAccessToken string
 }
